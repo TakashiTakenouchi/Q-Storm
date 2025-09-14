@@ -117,3 +117,29 @@ note "users.register 実装＆main.pyではusersにprefix付けない。"
 
 
 必要なら後で git commit -m "docs: daily notes" && git push でまとめて上げればOK
+------------------------------
+使い方（明日以降の復旧は1行）
+
+原点（GOLDEN）で作業したい
+
+git switch main
+
+
+今日の成果を再検証したい
+
+git switch codex/mvp-backend
+
+
+特定の黄金点に完全復帰
+
+git switch -c restore/golden golden/2025-09-14
+
+これで満たす要件
+
+Backend/Frontend ともにバージョン管理（main=黄金、feature=今日の作業）
+
+依存もロック（Pythonは locks/requirements-wsl.txt、フロントは package-lock.json）
+
+いつでも戻せる（git switch main もしくは git switch goldenタグ）
+
+もし「昨日の完成コミットが main 以外」だった場合でも、上の BASE 取得が「2025-09-14 23:59 以前」の main を掴むため、今日の変更には一切触れず黄金ラインを確定できます。安全第一の手順です。
