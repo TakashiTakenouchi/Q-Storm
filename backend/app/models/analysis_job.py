@@ -1,20 +1,17 @@
-from __future__ import annotations
-
-from datetime import datetime, timezone
-from sqlalchemy import DateTime, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column
-
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, UniqueConstraint
 from ..db import Base
 
 
 class AnalysisJob(Base):
     __tablename__ = "analysis_jobs"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    session_id: Mapped[int] = mapped_column(ForeignKey("sessions.id", ondelete="CASCADE"), index=True)
-    dataset_id: Mapped[int] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
-    type: Mapped[str] = mapped_column(String(32))  # timeseries | pareto | histogram
-    params_json: Mapped[str]
-    result_json: Mapped[str]
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(tz=timezone.utc))
+    id = Column(Integer, primary_key=True, index=True)
+    dataset_id = Column(Integer, ForeignKey("datasets.id"), nullable=False)
+    job_type = Column(String(32), nullable=False)
+    cache_key = Column(String(128), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
+    __table_args__ = (
+        UniqueConstraint("dataset_id", "job_type", "cache_key", name="uq_analysis_cache"),
+    )

@@ -1,0 +1,119 @@
+Codex CLIの使いかた
+/mnt/c/Projects/Q-Stormα
+正しいコマンド
+cd "/mnt/c/Projects/Q-Stormα"
+-----------------------------------------
+
+補足：次回の再開はこれだけ（メモ）
+
+Codex
+cd "/mnt/c/Projects/Q-Stormα"
+codex
+
+Backend
+cd "/mnt/c/Projects/Q-Stormα/backend"
+DATABASE_URL="sqlite:////home/$USER/qstormdb/app.db" ./.venv/bin/python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+
+Frontend（別ターミナル）
+cd "/mnt/c/Projects/Q-Stormα/frontend"
+npm run dev
+
+
+
+
+
+"C:\Projects\Q-Stormα"
+---------------AGENTS.md や README にナレッジを明示的に書き残すことで、次回以降も参照可能
+cd "/mnt/c/Projects/Q-Stormα"
+
+printf '%s\n' '# Q-Storm Platform Agent
+
+## Context
+This project implements **FastAPI + React + SQLite** for data analysis.  
+The focus is on **local development with WSL2** and a **Vite-based frontend**.
+
+## Tech Stack
+- Backend: FastAPI, SQLAlchemy, SQLite, pandas, numpy, openpyxl
+- Frontend: React, TypeScript, Vite, Axios, Plotly
+- Auth: JWT (HS256) with password hashing (passlib[bcrypt])
+- Deployment target: Local WSL2 environment (Linux)
+
+## Guidelines
+- Always use **SQLite** (no Postgres).
+- Passwords must be hashed with **passlib[bcrypt]** (never store plaintext).
+- JWT authentication with **HS256**.
+- Datasets are uploaded as **CSV/XLSX** and stored under `./backend/storage/`.
+- Analysis jobs (**timeseries, pareto, histogram**) must be cached.
+- Exports must be available in **CSV and XLSX** formats.
+- Error handling: return **422** for invalid requests, **404** for missing dataset/session.
+- Config values (DB path, secret key, token expiration) are always read from `.env`.
+
+## Roadmap
+1. **Backend persistence** with SQLite + SQLAlchemy
+2. **Frontend dashboard** with login, upload, and analysis visualization
+3. **Export endpoints** for analysis results (CSV/XLSX)
+4. (Optional) **Caching & optimization** of repeated analysis jobs
+
+## Notes
+- Development runs on **local CPU (WSL2)**, not GPU or cloud.
+- `.env` must contain:
+  - `DATABASE_URL=sqlite:///./app.db`
+  - `SECRET_KEY=...`
+  - `ACCESS_TOKEN_EXPIRE_MINUTES=60`
+- Follow modular structure: `app/models/`, `app/repos/`, `frontend/src/pages/`, etc.
+
+## File Structure
+- backend/
+  - app/
+    - main.py
+    - models/
+    - repos/
+    - db.py
+  - storage/
+  - README.md
+  - .env.example
+- frontend/
+  - src/pages/
+  - src/api/
+  - README.md
+' > AGENTS.md
+
+git add AGENTS.md
+git commit -m "docs: add AGENTS.md (project rules & roadmap)"
+-----------------------
+
+① いま即やる：1行で追記＋コミット（超速）
+
+WSLターミナルで（プロジェクト直下じゃなくてもOK）：
+
+# 例：今日の気づきを1行追記して即コミット
+cd "/mnt/c/Projects/Q-Stormα"
+echo "- $(date +'%Y-%m-%d %H:%M') DBを/home配下に移し、DATABASE_URLで絶対パス指定。users.registerを追加。main.pyのusersはprefix無し" >> AGENTS.md
+git add AGENTS.md && git commit -m "docs: update AGENTS with latest decisions" && git push
+
+
+“もう切り上げたい”時はこの1発だけで知見が残ります。
+-------------------
+② 5分で常用化：note コマンドを作る（どこでも note "..." で追記）
+
+~/.bashrc に関数を追加：
+
+cat >> ~/.bashrc <<'EOF'
+note() {
+  local ROOT="/mnt/c/Projects/Q-Stormα"
+  echo "- $(date +'%Y-%m-%d %H:%M') $*" >> "$ROOT/AGENTS.md"
+  git -C "$ROOT" add AGENTS.md >/dev/null 2>&1
+  echo "[saved to AGENTS.md]"
+}
+EOF
+source ~/.bashrc
+
+
+使い方（どこでもOK）：
+
+note "Backendは8000専用。DBは/home/$USER/qstormdb/app.dbに固定。"
+note "users.register 実装＆main.pyではusersにprefix付けない。"
+
+
+必要なら後で git commit -m "docs: daily notes" && git push でまとめて上げればOK

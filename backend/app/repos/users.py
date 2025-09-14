@@ -1,23 +1,24 @@
-from __future__ import annotations
-
-from typing import Optional
 from sqlalchemy.orm import Session
-
 from ..models.user import User
+from ..security import verify_password, get_password_hash
 
 
-def get_by_username(db: Session, username: str) -> Optional[User]:
+def get_by_username(db: Session, username: str) -> User | None:
     return db.query(User).filter(User.username == username).first()
 
 
-def get_by_id(db: Session, user_id: int) -> Optional[User]:
-    return db.query(User).filter(User.id == user_id).first()
-
-
-def create(db: Session, username: str, email: str, password_hash: str, full_name: str | None) -> User:
-    user = User(username=username, email=email, password_hash=password_hash, full_name=full_name)
+def create(db: Session, username: str, password: str) -> User:
+    user = User(username=username, hashed_password=get_password_hash(password))
     db.add(user)
     db.commit()
     db.refresh(user)
     return user
 
+
+def authenticate(db: Session, username: str, password: str) -> User | None:
+    user = get_by_username(db, username)
+    if not user:
+        return None
+    if not verify_password(password, user.hashed_password):
+        return None
+    return user

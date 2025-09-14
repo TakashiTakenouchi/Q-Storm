@@ -1,25 +1,15 @@
-from __future__ import annotations
-
-from contextlib import contextmanager
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+from .config import settings
 from typing import Generator
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+connect_args = {}
+if settings.DATABASE_URL.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
 
-from .core.config import settings
-
-
-class Base(DeclarativeBase):
-    pass
-
-
-engine = create_engine(settings.database_url, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def init_db() -> None:
-    from .models import user, session as sess, dataset, analysis_job  # noqa: F401
-    Base.metadata.create_all(bind=engine)
+engine = create_engine(settings.DATABASE_URL, connect_args=connect_args, future=True)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, future=True)
+Base = declarative_base()
 
 
 def get_db() -> Generator:
@@ -28,4 +18,3 @@ def get_db() -> Generator:
         yield db
     finally:
         db.close()
-
